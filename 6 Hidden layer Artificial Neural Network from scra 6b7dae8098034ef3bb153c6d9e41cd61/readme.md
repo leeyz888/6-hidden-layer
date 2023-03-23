@@ -1,1 +1,2 @@
 
+Folder to host images
