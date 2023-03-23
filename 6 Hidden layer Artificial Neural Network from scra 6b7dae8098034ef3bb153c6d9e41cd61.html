@@ -1,0 +1,921 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>6 Hidden layer Artificial Neural Network from scratch with numpy only (no for loops for back-propagation) </title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="6b7dae80-9803-4ef3-bb15-3c6d9e41cd61" class="page sans"><header><img class="page-cover-image" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/1728953.jpg" style="object-position:center 50%"/><div class="page-header-icon page-header-icon-with-cover"><span class="icon">🤖</span></div><h1 class="page-title">6 Hidden layer Artificial Neural Network from scratch with numpy only (no for loops for back-propagation) </h1></header><div class="page-body"><h1 id="a75565d0-7dec-48ad-93d0-3c7399b46fb2" class="">Hello folks! This notion page is dedicated to showcase how to create a 6 hidden layer artificial neural network to be used in a classification task using vectorisation approach. </h1><h2 id="94b1b71a-c795-4c1d-9e45-2542e940dcbe" class="">Table of contents </h2><nav id="f47f2bef-9e1e-4498-8380-8749613d5ec8" class="block-color-gray table_of_contents"><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#a75565d0-7dec-48ad-93d0-3c7399b46fb2">Hello folks! This notion page is dedicated to showcase how to create a 6 hidden layer artificial neural network to be used in a classification task using vectorisation approach. </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#94b1b71a-c795-4c1d-9e45-2542e940dcbe">Table of contents </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#d421d2d9-2715-4b2a-ad27-98844bf0e9aa">1) Dataset description</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#a1f8f21f-f6fe-486b-9db4-8a323c4e1f3b">2) Network Architecture and derivation of forward pass and back-propagation , using matrix algebra and term-by-term differentiation. </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#3e0a6b88-1065-4978-9e54-dcc6d4f479c3">Network Architecture , with the matrices for each layer. </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#121e8168-1fb5-4414-bccf-b6d3a4b82745">Forward pass</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#bc3478f4-c6da-4e79-bdb9-f1e86eac73df">Back-propagation derivation </a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#0382d565-5999-4c24-a7c3-19a06439aa82">Instead of the usual matrix differentiation which Andrew Ng and several others used, I plan to instead showcase the derivation of the back-propagation formulas using term by term partial differentiation in accordance with the multivariate version of the chain rule. </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#df19c4d9-9746-4cd1-a0b3-22e74b2500eb">Derivative with respect to the predicted output before softmax activation, i.e <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>Z</mi><mn>7</mn><mrow><mi>O</mi><mo separator="true">,</mo><mi>M</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">Z_7^{O,M}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.225547em;vertical-align:-0.266308em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.959239em;"><span style="top:-2.433692em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">7</span></span></span><span style="top:-3.1809080000000005em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">O</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.10903em;">M</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.266308em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> of which O denotes the output neuron, and M denotes the index of the input data.</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#673f801b-1925-43d5-87bf-435480cd4daf">Derivation of dW and dB, i.e the gradients of the Weights and Biases for the 7th layer </a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#ce3a057d-7700-45f4-b140-01a991bc8a55">For dW however it’s a bit more convuluted. Bellow I will try to clearly explain the derivation through term by term partial diffrentiation. </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#4203caa4-6a49-478b-96e4-83952c54e5bd">Derivation of dz6 ( and for all <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">dz_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord mathnormal">d</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.04398em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> with 0≤i&lt;6)</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#775d483c-1e11-44cb-b05d-26d647823944">In summary:</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#d5434e0e-1998-476c-9cd8-bd518c14b6ee">3) Implementation of ANN in Python, as well as training on MNIST dataset.</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#7bf461f9-6114-4b05-b104-2dc933af1d0d">Neural network class written in Python. </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#3aa0a5d7-a373-4c0f-b81c-172624a4bf2a">Firstly, we load the dataset through importing the sklearn library.</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#8e401a33-3dba-4434-9fdc-158b011c57ef">On splitting, the training dataset is further scaled down using the min_max scaler from the sklearn library:</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#f4de1c86-859e-487b-add8-2739481f7ef8">The Y_train vector then becomes a matrix with 1 denoting the value each image corresponds to:</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#80c37826-dd12-4bc6-ac39-1de1ffff1636">The dataset is then further transposed:</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#bff06d26-b2d7-4a36-a98e-62f0e5738ab4">The class is then initialised:</a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#49c32f6f-03fc-4eda-84ed-3063912487ce">The dataset is then fitted:</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#d9d87147-7983-42ba-9899-3e575f68566f">Weights and biases are updated using the gradient descent update rule, i.e:</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#652ae4f4-0ec7-4986-9b84-ceea2ba7fddd"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mrow><mi>u</mi><mi>p</mi><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>d</mi></mrow></msub><mo>=</mo><msub><mi>W</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mo>−</mo><mi>α</mi><mo>∗</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><msub><mi>W</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">W_{updated} =W_{old}- \alpha * \frac{ \partial L}{ \partial W_{old}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.46528em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.330968em;vertical-align:-0.4508599999999999em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3487714285714287em;margin-left:-0.13889em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15122857142857138em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal mtight">L</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4508599999999999em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><span>﻿</span></span></a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#a3f69817-3835-4f96-8260-13f7fa2533b5"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>i</mi><mi>a</mi><msub><mi>s</mi><mrow><mi>u</mi><mi>p</mi><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>d</mi></mrow></msub><mo>=</mo><mi>B</mi><mi>i</mi><mi>a</mi><msub><mi>s</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mo>−</mo><mi>α</mi><mo>∗</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>B</mi><mi>i</mi><mi>a</mi><msub><mi>s</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">Bias _{updated} =Bias_{old}- \alpha * \frac{ \partial L}{ \partial Bias_{old}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord mathnormal">ia</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord mathnormal">ia</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.46528em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.330968em;vertical-align:-0.4508599999999999em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal mtight" style="margin-right:0.05017em;">B</span><span class="mord mathnormal mtight">ia</span><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3487714285714287em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15122857142857138em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal mtight">L</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4508599999999999em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><span>﻿</span></span></a></div><div class="table_of_contents-item table_of_contents-indent-2"><a class="table_of_contents-link" href="#8afd549a-e6dc-49ff-ada7-8c8758a3bc86">The resulting test accuracy is then :</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#b8e0d230-e9d3-49e0-a651-02cea2c553bd">4) Investigation on training loss, training and dev accuracy.</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#d39ef991-0d85-4019-acd0-a9b945dd0918">Let us first investigate the training loss:</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#ea15c354-d686-4ba0-acba-f37e6cbaf0d7">Let us investigate the Training and Dev accuracies:</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#6fc12427-6c03-46c2-b0bd-1b419aaf932c">5) Conclusion</a></div></nav><h2 id="d421d2d9-2715-4b2a-ad27-98844bf0e9aa" class="">1) Dataset description</h2><ul id="5c5b9fde-0ba4-487f-9c12-8e1fa88477b1" class="bulleted-list"><li style="list-style-type:disc">MNIST Dataset , commonly used to demonstrate creation of ANNs.</li></ul><ul id="dd61da51-0d05-4656-b813-c01e8a0b2541" class="bulleted-list"><li style="list-style-type:disc">Comprises billions of handwritten numbers, a small subset is used for demo in sklearn library</li></ul><ul id="dc79ff0c-3cbf-4b46-945e-e6b5e5c529e4" class="bulleted-list"><li style="list-style-type:disc">Training dataset is preprocessed using min max scaler to facilitate the learning process  </li></ul><ul id="5d937f65-9f62-4cb1-9951-fbe9027acf94" class="bulleted-list"><li style="list-style-type:disc">Train-Dev-Test scheme is used to split data into training, development and testing datasets. </li></ul><h2 id="a1f8f21f-f6fe-486b-9db4-8a323c4e1f3b" class="">2) Network Architecture and derivation of forward pass and back-propagation , using matrix algebra and term-by-term differentiation. </h2><h2 id="3e0a6b88-1065-4978-9e54-dcc6d4f479c3" class="">Network Architecture , with the matrices for each layer. </h2><figure id="70f038c5-46f2-4b39-85f9-445e3f280874" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_2.30.33_PM.png"><img style="width:738px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_2.30.33_PM.png"/></a></figure><ul id="cb380731-28ed-4ad3-b5ee-deee2be0c30d" class="bulleted-list"><li style="list-style-type:disc">Activation is RelU all the way until the final layer, of which the corresponding activation is Softmax.</li></ul><h2 id="121e8168-1fb5-4414-bccf-b6d3a4b82745" class="">Forward pass</h2><figure id="4af1cc4b-7257-41a1-8106-4974f75f2169" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-12.jpeg"><img style="width:1668px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-12.jpeg"/></a></figure><ul id="f8964edd-e4ae-43ed-bec4-0bc38fb743d3" class="bulleted-list"><li style="list-style-type:disc">Or simply, in matrix notation <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mn>1</mn></msub><mo>=</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>n</mi><mi>p</mi><mi>u</mi><mi>t</mi><mtext> </mtext><mi>t</mi><mi>o</mi><mtext> </mtext><mi>f</mi><mi>i</mi><mi>r</mi><mi>s</mi><mi>t</mi><mtext> </mtext><mi>h</mi><mi>i</mi><mi>d</mi><mi>d</mi><mi>e</mi><mi>n</mi><mtext> </mtext><mi>l</mi><mi>a</mi><mi>y</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>∗</mo><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo>+</mo><msub><mi>B</mi><mrow><mi>i</mi><mi>n</mi><mi>p</mi><mi>u</mi><mi>t</mi><mtext> </mtext><mi>t</mi><mi>o</mi><mtext> </mtext><mi>f</mi><mi>i</mi><mi>r</mi><mi>s</mi><mi>t</mi><mtext> </mtext><mi>h</mi><mi>i</mi><mi>d</mi><mi>d</mi><mi>e</mi><mi>n</mi><mtext> </mtext><mi>l</mi><mi>a</mi><mi>y</mi><mi>e</mi><mi>r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Z_1=W_{input\ to\ first\ hidden\ layer}*(X)+B_{input\ to\ first\ hidden\ layer}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">in</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">o</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">rs</span><span class="mord mathnormal mtight">t</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">hi</span><span class="mord mathnormal mtight">dd</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">yer</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">in</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">o</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">rs</span><span class="mord mathnormal mtight">t</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">hi</span><span class="mord mathnormal mtight">dd</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">yer</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> of which X is the training data transformed into a matrix of dimensions (number of features)X(number of samples). </li></ul><ul id="dc151d19-dbc0-41e9-9acd-f7ab6950f3d2" class="bulleted-list"><li style="list-style-type:disc"><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mn>1</mn></msub><mo>=</mo><mi>R</mi><mi>e</mi><mi>L</mi><mi>U</mi><mo stretchy="false">(</mo><msub><mi>Z</mi><mn>1</mn></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">A_1=ReLU(Z_1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.10903em;">LU</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span>, which is also the output from the input layer to the first hidden layer. </li></ul><ul id="724fcbf7-b327-41a6-be1f-62633245165c" class="bulleted-list"><li style="list-style-type:disc">This can be generalised to all hidden layers as well as the output layer, i.e <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><msub><mi>W</mi><mrow><mi>i</mi><mi>t</mi><mi>h</mi><mtext> </mtext><mi>h</mi><mi>i</mi><mi>d</mi><mi>d</mi><mi>e</mi><mi>n</mi><mtext> </mtext><mi>l</mi><mi>a</mi><mi>y</mi><mi>e</mi><mi>r</mi><mtext> </mtext><mi>t</mi><mi>o</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi>t</mi><mi>h</mi><mtext> </mtext><mi>h</mi><mi>i</mi><mi>d</mi><mi>d</mi><mi>e</mi><mi>n</mi><mtext> </mtext><mi>l</mi><mi>a</mi><mi>y</mi><mi>e</mi><mi>r</mi></mrow></msub><mo>∗</mo><mo stretchy="false">(</mo><msub><mi>A</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>+</mo><msub><mi>B</mi><mrow><mi>i</mi><mi>t</mi><mi>h</mi><mtext> </mtext><mi>t</mi><mi>o</mi><mtext> </mtext><mo stretchy="false">(</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi>t</mi><mi>h</mi><mtext> </mtext><mi>h</mi><mi>i</mi><mi>d</mi><mi>d</mi><mi>e</mi><mi>n</mi><mtext> </mtext><mi>l</mi><mi>a</mi><mi>y</mi><mi>e</mi><mi>r</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Z_{i+1}=W_{ith\ hidden\ layer\  to\ (i+1)th\ hidden\ layer}*(A_i)+B_{ith\ to\ (i+1)th\ hidden\ layer}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.891661em;vertical-align:-0.208331em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.03853em;vertical-align:-0.3551999999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.34480000000000005em;"><span style="top:-2.5198em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">h</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">hi</span><span class="mord mathnormal mtight">dd</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">yer</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">o</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span><span class="mclose mtight">)</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">h</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">hi</span><span class="mord mathnormal mtight">dd</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">yer</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3551999999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.03853em;vertical-align:-0.3551999999999999em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.34480000000000005em;"><span style="top:-2.5198em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">h</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">o</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mopen mtight">(</span><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span><span class="mclose mtight">)</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">h</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight">hi</span><span class="mord mathnormal mtight">dd</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">n</span><span class="mspace mtight"><span class="mtight"> </span></span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">yer</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3551999999999999em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></li></ul><ul id="892bf399-e32b-4441-9474-e99152c64a7b" class="bulleted-list"><li style="list-style-type:disc">And that <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mi>R</mi><mi>e</mi><mi>L</mi><mi>U</mi><mo stretchy="false">(</mo><msub><mi>Z</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">A_{i+1}=ReLU(Z_{i+1})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.891661em;vertical-align:-0.208331em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mord mathnormal">e</span><span class="mord mathnormal" style="margin-right:0.10903em;">LU</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span></li></ul><ul id="a44c7e37-06a6-4dc4-af9b-2f6d3bd6c2db" class="bulleted-list"><li style="list-style-type:disc">In other words:</li></ul><figure id="bb2d1efa-bd0d-4298-8100-89c2698e1745" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-13.jpeg"><img style="width:1668px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-13.jpeg"/></a></figure><ul id="979f43f6-28a8-43ba-b612-906180b919a6" class="bulleted-list"><li style="list-style-type:disc">And at the output layer <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mrow><mi>o</mi><mi>u</mi><mi>t</mi><mi>p</mi><mi>u</mi><mi>t</mi></mrow></msub><mo>=</mo><mi>S</mi><mi>o</mi><mi>f</mi><mi>t</mi><mi>m</mi><mi>a</mi><mi>x</mi><mo stretchy="false">(</mo><msub><mi>Z</mi><mrow><mi>o</mi><mi>u</mi><mi>t</mi><mi>p</mi><mi>u</mi><mi>t</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">A_{output}=Softmax(Z_{output})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">tp</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mord mathnormal">t</span><span class="mord mathnormal">ma</span><span class="mord mathnormal">x</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">tp</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span><span>﻿</span></span></li></ul><ul id="4658de0c-02c3-4aef-9637-1c332fe0bca2" class="bulleted-list"><li style="list-style-type:disc">The horizontal lines indicate that the inputs are row vectors, with M columns . </li></ul><h2 id="bc3478f4-c6da-4e79-bdb9-f1e86eac73df" class="">Back-propagation derivation </h2><h3 id="0382d565-5999-4c24-a7c3-19a06439aa82" class="">Instead of the usual matrix differentiation which Andrew Ng and several others used, I plan to instead showcase the derivation of the back-propagation formulas using term by term partial differentiation in accordance with the multivariate version of the chain rule. </h3><figure class="callout" style="white-space:pre-wrap;display:flex" id="e7ae7976-43a3-4bae-ac48-8f8c32537cc0"><div style="font-size:1.5em"><span class="icon">💡</span></div><div style="width:100%">IMO using the multivariable chain rule is more beginner friendly and albeit more verbosic, is more easily understood by normal undergrad students. </div></figure><ul id="81748c1b-7898-4ae0-b160-45985d794e83" class="bulleted-list"><li style="list-style-type:disc">Firstly, I plan to write out the formula for the loss function as well as the derivative with respect to <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mrow><mi>o</mi><mi>u</mi><mi>t</mi><mi>p</mi><mi>u</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">Z_{output}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.28055599999999997em;"><span style="top:-2.5500000000000003em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">tp</span><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> or <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mrow><mi>n</mi><mi>m</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\hat{y}_{nm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.19444em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">nm</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span>.</li></ul><ul id="0358d89e-322c-4ad6-8ef1-7c6de2a3b59b" class="bulleted-list"><li style="list-style-type:disc">The loss function is as follows:</li></ul><figure id="2b4d9221-179d-414f-8261-6c5ada924c13" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_3.03.54_PM.png"><img style="width:930px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_3.03.54_PM.png"/></a></figure><p id="3af0b1f5-3e69-42d5-92aa-4e9d87d1d807" class="">where M is the number of samples and N is the number of outputs. <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>n</mi><mi>m</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{nm} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">nm</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> in this case is the true value in contrast to the prediction which is <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mrow><mi>n</mi><mi>m</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\hat{y}_{nm}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.69444em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.19444em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">nm</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span>. In other words, the loss for this ANN is the mean categorical-cross entropy. </p><ul id="9b8190c0-7bba-4066-891b-4aad52b2e7bb" class="bulleted-list"><li style="list-style-type:disc">M= 1439 whilst N=10, implying that we plan to classify the picture as showing numbers from 0 to 9. </li></ul><h2 id="df19c4d9-9746-4cd1-a0b3-22e74b2500eb" class="">Derivative with respect to the predicted output before softmax activation, i.e <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>Z</mi><mn>7</mn><mrow><mi>O</mi><mo separator="true">,</mo><mi>M</mi></mrow></msubsup></mrow><annotation encoding="application/x-tex">Z_7^{O,M}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.225547em;vertical-align:-0.266308em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">Z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.959239em;"><span style="top:-2.433692em;margin-left:-0.07153em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">7</span></span></span><span style="top:-3.1809080000000005em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">O</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.10903em;">M</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.266308em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> of which O denotes the output neuron, and M denotes the index of the input data.</h2><figure id="c49d0361-9c7b-444b-aa8b-00bc8be7755f" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-7.jpg"><img style="width:1668px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-7.jpg"/></a></figure><figure id="2d38f4ff-9637-4c66-b103-01c7e3dbd637" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-8.jpg"><img style="width:1668px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-8.jpg"/></a></figure><ul id="f3e81040-5cfa-4f75-9f8f-56025ef7978e" class="bulleted-list"><li style="list-style-type:disc">As the binary labels (only one 1, rest are 0s) sum up to 1. </li></ul><ul id="84a7b550-758f-40ad-8741-964712bc6f04" class="bulleted-list"><li style="list-style-type:disc">Hence: </li></ul><figure id="d702a67b-3253-4204-b1a9-9621f3cb11e5" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.30.16_PM.png"><img style="width:1524px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.30.16_PM.png"/></a></figure><p id="08a3e92b-40f2-43a1-95c5-a83ac6cc226b" class="">of which m denotes the <strong>mth</strong> training data. </p><ul id="e15390b9-f80c-4a86-94e4-3e427c4dc885" class="bulleted-list"><li style="list-style-type:disc">Thusly, </li></ul><figure id="8b755325-6492-474e-9614-d7f2e163992a" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.42.53_PM.png"><img style="width:1026px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.42.53_PM.png"/></a></figure><p id="94ff70a3-a790-4167-a1b8-221821c78f8c" class="">where : </p><figure id="97cabe3c-df02-4ae6-af51-dea6983f094e" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.46.10_PM.png"><img style="width:1368px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.46.10_PM.png"/></a></figure><h2 id="673f801b-1925-43d5-87bf-435480cd4daf" class="">Derivation of dW and dB, i.e the gradients of the Weights and Biases for the 7th layer </h2><ul id="2eece1d1-464b-4e99-8f66-e7b7b6abf380" class="bulleted-list"><li style="list-style-type:disc">For the bias vector it is suprisingly direct, since the terms are linear per se. </li></ul><ul id="c6a59d96-a52d-44a0-9dd3-55acfe6579ae" class="bulleted-list"><li style="list-style-type:disc">The image bellow shows the derivation:</li></ul><figure id="d8a1603a-8d22-4b45-b133-18354f8a28f8" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.50.56_PM.png"><img style="width:848px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_4.50.56_PM.png"/></a></figure><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="1813aab1-1361-4bf3-bcfd-0ef39ba4e87d"><div style="font-size:1.5em"><span class="icon">🌠</span></div><div style="width:100%">The derivative w.r.t the bias term cancels out to 1, hence the gradient for the bias from the 7th layer to the output node is simply the sum of the errors for all samples. The o and the m denote the oth and the mth output node and sample data, respectively. </div></figure><h3 id="ce3a057d-7700-45f4-b140-01a991bc8a55" class="">For dW however it’s a bit more convuluted. Bellow I will try to clearly explain the derivation through term by term partial diffrentiation. </h3><figure id="5663a6ff-bd18-4799-86d1-97a68ddccb8a" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_5.20.09_PM.png"><img style="width:870px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Screenshot_2022-08-26_at_5.20.09_PM.png"/></a></figure><figure id="5f592c03-755b-49e6-9641-c348ef1c591b" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-18.jpeg"><img style="width:1668px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/6_Layer_Nn_-18.jpeg"/></a></figure><p id="213e2138-cb60-4e43-8f38-c6edb9b06d39" class="">which leaves us with dz6 and etc. </p><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="07ae3a16-683d-4ad4-9103-f52d313708da"><div style="font-size:1.5em"><span class="icon">💡</span></div><div style="width:100%">Do note that <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mn>0</mn></msub><mo>=</mo><mi>X</mi></mrow><annotation encoding="application/x-tex">A_0=X</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">X</span></span></span></span></span><span>﻿</span></span> or the input data with dimensions (NXM) as this is the input data for the first layer. </div></figure><h2 id="4203caa4-6a49-478b-96e4-83952c54e5bd" class="">Derivation of dz6 ( and for all <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>z</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">dz_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord mathnormal">d</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.04398em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span> with 0≤i&lt;6)</h2><figure id="391f8e84-4293-4b75-bffb-0f8a4f752fdd" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25885.41.49.png"><img style="width:876px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25885.41.49.png"/></a></figure><h2 id="775d483c-1e11-44cb-b05d-26d647823944" class="">In summary:</h2><figure id="4a1b0475-240c-4ac7-88e1-4abff952dfa9" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/IMG_151545E26F77-1.jpeg"><img style="width:1927px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/IMG_151545E26F77-1.jpeg"/></a></figure><h1 id="d5434e0e-1998-476c-9cd8-bd518c14b6ee" class="">3) Implementation of ANN in Python, as well as training on MNIST dataset.</h1><h2 id="7bf461f9-6114-4b05-b104-2dc933af1d0d" class="">Neural network class written in Python. </h2><pre id="2e992203-5e8c-4507-a000-9694d637f382" class="code"><code>import numpy as np
+from scipy.special import expit as sigmoid
+from scipy.special import softmax as sm
+import pandas as pd
+import math
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import log_loss
+from math import sqrt
+from math import log
+
+class NeuralNet:
+    def __init__(self, num_features, num_hidden1,num_hidden2,num_hidden3,num_hidden4,num_hidden5,num_hidden6 ,alpha, max_epochs, num_output, _EPSILON):
+        super().__init__()
+        self.num_features=num_features  # number of input nodes (features)
+        self.num_hidden1=num_hidden1  # number of hidden nodes for 1st hidden layer
+        self.num_hidden2=num_hidden2  # number of hidden nodes for 2nd hidden layer
+        self.num_hidden3=num_hidden3  # number of hidden nodes for 3rd hidden layer
+        self.num_hidden4=num_hidden4  # number of hidden nodes for 4th hidden layer
+        self.num_hidden5=num_hidden5  # number of hidden nodes for 5th hidden layer
+        self.num_hidden6=num_hidden6  # number of hidden nodes for 6th hidden layer
+        self.alpha=alpha  # learning rate
+        self.max_epochs=max_epochs # maximum number of epochs
+        self.num_output=num_output # number of output nodes
+        self._EPSILON=_EPSILON
+        self.loss = [] #list to store losses per 100 epochs 
+        self.trainingaccur=[] # list to store training accuracy per 100 epochs 
+        self.devaccur=[]
+        self.Weights_Input_to_H1=np.random.randn(self.num_hidden1, self.num_features)*(0.1)
+        self.Bias_Input_to_H1=np.zeros([self.num_hidden1,1])
+        self.Weights_H1_to_H2=np.random.randn(self.num_hidden2, self.num_hidden1)*(0.1)
+        self.Bias_H1_to_H2=np.zeros([self.num_hidden2,1])
+        self.Weights_H2_to_H3=np.random.randn(self.num_hidden3, self.num_hidden2)*(0.1)
+        self.Bias_H2_to_H3=np.zeros([self.num_hidden3,1])
+        self.Weights_H3_to_H4=np.random.randn(self.num_hidden4, self.num_hidden3)*(0.1)
+        self.Bias_H3_to_H4=np.zeros([self.num_hidden4,1])
+        self.Weights_H4_to_H5=np.random.randn(self.num_hidden5, self.num_hidden4)*(0.1)
+        self.Bias_H4_to_H5=np.zeros([self.num_hidden5,1])
+        self.Weights_H5_to_H6=np.random.randn(self.num_hidden6, self.num_hidden5)*(0.1)
+        self.Bias_H5_to_H6=np.zeros([self.num_hidden6,1])
+        self.Weights_H6_to_output=np.random.randn(self.num_output, self.num_hidden6)*(0.1)
+        self.Bias_H6_to_output=np.zeros([self.num_output,1])
+        self.dWeights_Input_to_H1=np.zeros([self.num_hidden1, self.num_features])
+        self.dBias_Input_to_H1=np.zeros([self.num_hidden1,1])
+        self.dWeights_H1_to_H2=np.zeros([self.num_hidden2, self.num_hidden1])
+        self.dBias_H1_to_H2=np.zeros([self.num_hidden2,1])
+        self.dWeights_H2_to_H3=np.zeros([self.num_hidden3, self.num_hidden2])
+        self.dBias_H2_to_H3=np.zeros([self.num_hidden3,1])
+        self.dWeights_H3_to_H4=np.zeros([self.num_hidden4, self.num_hidden3])
+        self.dBias_H3_to_H4=np.zeros([self.num_hidden4,1])
+        self.dWeights_H4_to_H5=np.zeros([self.num_hidden5, self.num_hidden4])
+        self.dBias_H4_to_H5=np.zeros([self.num_hidden5,1])
+        self.dWeights_H5_to_H6=np.zeros([self.num_hidden6, self.num_hidden5])
+        self.dBias_H5_to_H6=np.zeros([self.num_hidden6,1])
+        self.dWeights_H6_to_output=np.zeros([self.num_output, self.num_hidden6])
+        self.dBias_H6_to_output=np.zeros([self.num_output,1])
+        
+        
+
+        
+    
+    def relU(self,X):
+        return np.maximum(X, 0)
+    
+    def deriv(self,X):
+        return np.where(X&lt;=0,0,1)
+        
+        
+
+
+    
+    def softmax(self,x):
+        e=np.exp(x)
+        for i in range(e.shape[1]):
+            e[:,i]=e[:,i]/np.sum(e[:,i])
+        return e
+
+    
+    
+
+    
+        
+    # TODO: complete implementation for forward pass
+    def forward(self, X):
+        self.z1=np.dot((self.Weights_Input_to_H1),(X))+self.Bias_Input_to_H1
+        self.a1=self.relU(self.z1)
+        self.z2=np.dot((self.Weights_H1_to_H2),(self.a1))+self.Bias_H1_to_H2
+        self.a2=self.relU(self.z2)
+        self.z3=np.dot((self.Weights_H2_to_H3),(self.a2))+self.Bias_H2_to_H3
+        self.a3=self.relU(self.z3)
+        self.z4=np.dot((self.Weights_H3_to_H4),(self.a3))+self.Bias_H3_to_H4
+        self.a4=self.relU(self.z4)
+        self.z5=np.dot((self.Weights_H4_to_H5),(self.a4))+self.Bias_H4_to_H5
+        self.a5=self.relU(self.z5)
+        self.z6=np.dot((self.Weights_H5_to_H6),(self.a5))+self.Bias_H5_to_H6
+        self.a6=self.relU(self.z6)
+        self.z7=np.dot((self.Weights_H6_to_output),(self.a6))+self.Bias_H6_to_output
+        self.a7=self.softmax((self.z7))
+        return self.a7
+        
+        
+        
+    
+    # TODO: complete implementation for backpropagation
+    # the following Numpy functions may be useful: np.dot, np.sum, np.tanh, numpy.ndarray.T
+    def backprop(self, X, t):
+            
+        self.dWeights_Input_to_H1=np.zeros([self.num_hidden1, self.num_features])
+        self.dBias_Input_to_H1=np.zeros([self.num_hidden1,1])
+        self.dWeights_H1_to_H2=np.zeros([self.num_hidden2, self.num_hidden1])
+        self.dBias_H1_to_H2=np.zeros([self.num_hidden2,1])
+        self.dWeights_H2_to_H3=np.zeros([self.num_hidden3, self.num_hidden2])
+        self.dBias_H2_to_H3=np.zeros([self.num_hidden3,1])
+        self.dWeights_H3_to_H4=np.zeros([self.num_hidden4, self.num_hidden3])
+        self.dBias_H3_to_H4=np.zeros([self.num_hidden4,1])
+        self.dWeights_H4_to_H5=np.zeros([self.num_hidden5, self.num_hidden4])
+        self.dBias_H4_to_H5=np.zeros([self.num_hidden5,1])
+        self.dWeights_H5_to_H6=np.zeros([self.num_hidden6, self.num_hidden5])
+        self.dBias_H5_to_H6=np.zeros([self.num_hidden6,1])
+        self.dWeights_H6_to_output=np.zeros([self.num_output, self.num_hidden6])
+        self.dBias_H6_to_output=np.zeros([self.num_output,1])
+        self.dz7=(self.a7.reshape(self.num_output,-1)-t.reshape(self.num_output,-1))/((X.shape[1]))
+        self.dBias_H6_to_output=np.sum(self.dz7,axis=1,keepdims=True)
+        self.dWeights_H6_to_output=np.dot((self.dz7),self.a6.T)
+        self.dz6=(np.dot(self.Weights_H6_to_output.T,self.dz7)) * (self.deriv(self.z6))
+        self.dBias_H5_to_H6=np.sum(self.dz6,axis=1,keepdims=True)
+        self.dWeights_H5_to_H6=np.dot((self.dz6),(self.a5.T))
+        self.dz5=(np.dot(self.Weights_H5_to_H6.T,self.dz6)) * (self.deriv(self.z5))
+        self.dBias_H4_to_H5=np.sum(self.dz5,axis=1,keepdims=True)
+        self.dWeights_H4_to_H5=np.dot((self.dz5),(self.a4.T))
+        self.dz4=(np.dot(self.Weights_H4_to_H5.T,self.dz5)) * (self.deriv(self.z4))
+        self.dBias_H3_to_H4=np.sum(self.dz4,axis=1,keepdims=True)
+        self.dWeights_H3_to_H4=np.dot((self.dz4),(self.a3.T))
+        self.dz3=(np.dot(self.Weights_H3_to_H4.T,self.dz4)) * (self.deriv(self.z3))
+        self.dBias_H2_to_H3=np.sum(self.dz3,axis=1,keepdims=True)
+        self.dWeights_H2_to_H3=np.dot((self.dz3),(self.a2.T))
+        self.dz2=(np.dot(self.Weights_H2_to_H3.T,self.dz3)) * (self.deriv(self.z2))
+        self.dBias_H1_to_H2=np.sum(self.dz2,axis=1,keepdims=True)
+        self.dWeights_H1_to_H2=np.dot((self.dz2),(self.a1.T))
+        self.dz1=(np.dot(self.Weights_H1_to_H2.T,self.dz2)) * (self.deriv(self.z1))
+        self.dBias_Input_to_H1=np.sum(self.dz1,axis=1,keepdims=True)
+        self.dWeights_Input_to_H1=np.dot((self.dz1),X.T)
+        
+        
+        
+        
+        
+            
+                
+                
+                
+              
+                        
+                
+      
+        
+        
+    
+    #TODO: complete implementation for fitting data, and change the existing code if needed
+    def fit(self, x_train_data, y_train_data,x_dev_data,y_dev_data):
+       
+        
+        
+        for step in range(self.max_epochs):
+            self.forward(x_train_data)
+            self.backprop(x_train_data, y_train_data)
+            self.CCloss=log_loss(np.transpose(y_train_data),np.transpose(self.a7),eps=self._EPSILON,normalize=True)
+            self.trainingaccuracy=accuracy_score(np.argmax(y_train_data,axis=0),np.argmax(self.forward(x_train_data),axis=0))
+            self.devaccuracy=accuracy_score(np.argmax(y_dev_data,axis=0),np.argmax(self.forward(x_dev_data),axis=0))
+            self.Bias_H6_to_output=self.Bias_H6_to_output-((self.alpha)*(self.dBias_H6_to_output))
+            self.Weights_H6_to_output=self.Weights_H6_to_output-((self.alpha)*(self.dWeights_H6_to_output))
+            self.Bias_H5_to_H6=self.Bias_H5_to_H6-((self.alpha)*(self.dBias_H5_to_H6))
+            self.Weights_H5_to_H6=self.Weights_H5_to_H6-((self.alpha)*(self.dWeights_H5_to_H6))
+            self.Bias_H4_to_H5=self.Bias_H4_to_H5-((self.alpha)*(self.dBias_H4_to_H5))
+            self.Weights_H4_to_H5=self.Weights_H4_to_H5-((self.alpha)*(self.dWeights_H4_to_H5))
+            self.Bias_H3_to_H4=self.Bias_H3_to_H4-((self.alpha)*(self.dBias_H3_to_H4))
+            self.Weights_H3_to_H4=self.Weights_H3_to_H4-((self.alpha)*(self.dWeights_H3_to_H4))
+            self.Bias_H2_to_H3=self.Bias_H2_to_H3-((self.alpha)*(self.dBias_H2_to_H3))
+            self.Weights_H2_to_H3=self.Weights_H2_to_H3-((self.alpha)*(self.dWeights_H2_to_H3))
+            self.Bias_H1_to_H2=self.Bias_H1_to_H2-((self.alpha)*(self.dBias_H1_to_H2))
+            self.Weights_H1_to_H2=self.Weights_H1_to_H2-((self.alpha)*(self.dWeights_H1_to_H2))
+            self.Bias_Input_to_H1=self.Bias_Input_to_H1-((self.alpha)*(self.dBias_Input_to_H1))
+            self.Weights_Input_to_H1=self.Weights_Input_to_H1-((self.alpha)*(self.dWeights_Input_to_H1))
+
+
+            if step % 100 == 0:
+                print(f&#x27;step: {step},  loss: {self.CCloss:3.150f}&#x27;) 
+                print(accuracy_score(np.argmax(y_train_data,axis=0),np.argmax(self.forward(x_train_data),axis=0)))
+                print(accuracy_score(np.argmax(y_dev_data,axis=0),np.argmax(self.forward(x_dev_data),axis=0)))
+                self.loss.append(self.CCloss)
+                self.trainingaccur.append(self.trainingaccuracy)
+                self.devaccur.append(self.devaccuracy)
+                
+              
+            
+            
+    def predict(self,X,y=None):
+        self.forward(X)
+        if(self.num_output&gt;1):
+            y_hat=np.argmax(self.a7, axis=0)
+            temp=accuracy_score(y_hat,y)
+        else:
+            y_hat=np.where(self.a7&gt;0.5,1,0)
+            temp=accuracy_score(y_hat,y)
+        return temp,y_hat</code></pre><h2 id="3aa0a5d7-a373-4c0f-b81c-172624a4bf2a" class="">Firstly, we load the dataset through importing the sklearn library.</h2><pre id="07273632-e00d-4acb-ba67-bf24d136bba4" class="code code-wrap"><code>import sklearn
+from sklearn import datasets
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_digits
+
+
+# import some data to play with
+mnist = load_digits()
+X=mnist.data
+Y=mnist.target</code></pre><pre id="5dc70eed-a5f1-464a-a14c-cae792c0cc6e" class="code code-wrap"><code>X.shape,Y.shape</code></pre><figure id="e90c6fe3-0119-4bed-8121-8030099e2fdd" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.34.11.png"><img style="width:518px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.34.11.png"/></a></figure><ul id="6bdfede2-98b0-43f7-b271-4bf6d02b1f43" class="bulleted-list"><li style="list-style-type:disc">On checking its shapes, it would seem that for X the row number denotes the mth sample data, whilst there are 64 features in the data. </li></ul><pre id="a2a14901-a07f-4a04-bd2e-59357d9d2e05" class="code code-wrap"><code>X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1)
+X_train, X_dev, Y_train, Y_dev = train_test_split(X_train, Y_train, test_size=0.11)
+</code></pre><ul id="e1936051-1113-4186-ba9f-380d97dd07dc" class="bulleted-list"><li style="list-style-type:disc">On splitting using train_test_split, we get the following training and development and testing datasets respectively:</li></ul><figure id="e07239f3-e1c8-4974-b296-eb639e415b1d" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.37.02.png"><img style="width:848px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.37.02.png"/></a></figure><h2 id="8e401a33-3dba-4434-9fdc-158b011c57ef" class="">On splitting, the training dataset is further scaled down using the min_max scaler from the sklearn library:</h2><pre id="dde92cff-5593-4c2c-8a71-8eae26cf1bb5" class="code code-wrap"><code>import sklearn as sk
+scaler=sk.preprocessing.MinMaxScaler()</code></pre><pre id="014ff181-c755-4aa3-90fd-2793fb09a77b" class="code code-wrap"><code>for a in range(X_train.shape[0]):
+  X_train[a,:]=scaler.fit_transform(X_train[a,:].reshape(-1, 1)).flatten()</code></pre><ul id="9139b23b-49af-4789-a4f8-3f85fafa03dd" class="bulleted-list"><li style="list-style-type:disc">One-hot encoding is then done on all training and dev true-value vectors (i.e Y):</li></ul><pre id="ba429ab3-f889-456d-a1e7-b3c361e658f8" class="code code-wrap"><code>Y_train=np.array(pd.get_dummies(np.array(Y_train)))
+Y_dev=np.array(pd.get_dummies(np.array(Y_dev)))</code></pre><h3 id="f4de1c86-859e-487b-add8-2739481f7ef8" class="">The Y_train vector then becomes a matrix with 1 denoting the value each image corresponds to:</h3><figure id="56e60825-4dfc-4795-a103-191669a429e5" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.40.17.png"><img style="width:828px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.40.17.png"/></a></figure><h3 id="80c37826-dd12-4bc6-ac39-1de1ffff1636" class="">The dataset is then further transposed:</h3><pre id="a8b8abac-0786-4b98-b6b0-46d8ae92a511" class="code code-wrap"><code>X_train=np.transpose(X_train)
+X_dev=np.transpose(X_dev)
+Y_train=np.transpose(Y_train)
+Y_dev=np.transpose(Y_dev)</code></pre><ul id="54b72183-5248-4825-bc1d-b40f07efa713" class="bulleted-list"><li style="list-style-type:disc">Yielding the output:</li></ul><figure id="7040c723-8bb5-43f5-bf6e-691c80f89e86" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.42.00.png"><img style="width:704px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-26_%25E4%25B8%258B%25E5%258D%25886.42.00.png"/></a></figure><h3 id="bff06d26-b2d7-4a36-a98e-62f0e5738ab4" class="">The class is then initialised:</h3><pre id="de4d0dfc-578a-4414-bd26-7b627f6f18c5" class="code code-wrap"><code>numHidden1 = 500 # number of hidden nodes
+numHidden2 = 500# number of hidden nodes
+numHidden3 = 500# number of hidden nodes
+numHidden4 = 500# number of hidden nodes
+numHidden5 = 500# number of hidden nodes
+numHidden6 = 500# number of hidden nodes
+num_features = X_train.shape[0]
+numOutput = Y_train.shape[0]
+max_epoches = 1000000
+alpha = 0.01
+epsilon=0.00000000001
+NN = NeuralNet(num_features, numHidden1,numHidden2,numHidden3,numHidden4,numHidden5,numHidden6, alpha, max_epoches, numOutput,epsilon)</code></pre><ul id="50547153-1f65-4660-9ceb-761522f6c479" class="bulleted-list"><li style="list-style-type:disc">where alpha is the learning rate and epsilon is there to prevent the predicted outputs =0 (as log(0) is undefined)</li></ul><ul id="2543814b-989e-4cb6-82e2-0171c6069484" class="bulleted-list"><li style="list-style-type:disc">The weights are randomly chosen from the standard normal distribution with sd=0.1, as using 0 as the initial weights will cause the network to become symmetrical , i.e same outputs for each training data fed into the network. </li></ul><ul id="4e9776fa-ad71-4c16-8293-f3894bfec1e2" class="bulleted-list"><li style="list-style-type:disc">The standard deviation= 0.1 as the network is relatively deep, hence weights too close to 0 will cause the symmetry problem, regardless of whether or not they are from the normal distribution. </li></ul><ul id="c78e99f4-acd3-43b4-a2c6-7eae4c481edc" class="bulleted-list"><li style="list-style-type:disc">The biases are set to 0. </li></ul><h3 id="49c32f6f-03fc-4eda-84ed-3063912487ce" class="">The dataset is then fitted:</h3><pre id="710bbe44-7103-4c07-a380-b12d4a135ff2" class="code code-wrap"><code>NN.fit(X_train,Y_train,X_dev,Y_dev)</code></pre><h2 id="d9d87147-7983-42ba-9899-3e575f68566f" class="">Weights and biases are updated using the gradient descent update rule, i.e:</h2><h2 id="652ae4f4-0ec7-4986-9b84-ceea2ba7fddd" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mrow><mi>u</mi><mi>p</mi><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>d</mi></mrow></msub><mo>=</mo><msub><mi>W</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mo>−</mo><mi>α</mi><mo>∗</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><msub><mi>W</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">W_{updated} =W_{old}- \alpha * \frac{ \partial L}{ \partial W_{old}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.13889em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.46528em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.330968em;vertical-align:-0.4508599999999999em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">W</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3487714285714287em;margin-left:-0.13889em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15122857142857138em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal mtight">L</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4508599999999999em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><span>﻿</span></span></h2><h2 id="a3f69817-3835-4f96-8260-13f7fa2533b5" class=""><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>i</mi><mi>a</mi><msub><mi>s</mi><mrow><mi>u</mi><mi>p</mi><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>d</mi></mrow></msub><mo>=</mo><mi>B</mi><mi>i</mi><mi>a</mi><msub><mi>s</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mo>−</mo><mi>α</mi><mo>∗</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>B</mi><mi>i</mi><mi>a</mi><msub><mi>s</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">Bias _{updated} =Bias_{old}- \alpha * \frac{ \partial L}{ \partial Bias_{old}} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.969438em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord mathnormal">ia</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361079999999999em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">u</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mord mathnormal">ia</span><span class="mord"><span class="mord mathnormal">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.46528em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.330968em;vertical-align:-0.4508599999999999em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801079999999999em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal mtight" style="margin-right:0.05017em;">B</span><span class="mord mathnormal mtight">ia</span><span class="mord mtight"><span class="mord mathnormal mtight">s</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3487714285714287em;margin-left:0em;margin-right:0.07142857142857144em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15122857142857138em;"><span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight" style="margin-right:0.05556em;">∂</span><span class="mord mathnormal mtight">L</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4508599999999999em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span><span>﻿</span></span></h2><ul id="98bc7bf2-145a-4817-86c4-6e1218811324" class="bulleted-list"><li style="list-style-type:disc">Where <style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.2/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span></span><span>﻿</span></span> is the learning rate. </li></ul><h3 id="8afd549a-e6dc-49ff-ada7-8c8758a3bc86" class="">The resulting test accuracy is then :</h3><pre id="0d548cc4-2016-4d65-bfc2-771ef35c6626" class="code code-wrap"><code>accuracy_score((Y_test),np.argmax(NN.forward(X_test.T),axis=0))</code></pre><figure id="156a8f3b-bd0f-440e-8a12-6114b004a13a" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-28_%25E4%25B8%258B%25E5%258D%25886.29.15.png"><img style="width:1346px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/%25E6%2588%25AA%25E5%25B1%258F2022-08-28_%25E4%25B8%258B%25E5%258D%25886.29.15.png"/></a></figure><ul id="5fcbf5f9-4406-4953-9310-bfa4206ab08f" class="bulleted-list"><li style="list-style-type:disc">96.11% test accuracy! Rather high huh? If the network were deeper it is even possible to obtain 99.9999% accuracy and above!</li></ul><h1 id="b8e0d230-e9d3-49e0-a651-02cea2c553bd" class="">4) Investigation on training loss, training and dev accuracy.</h1><h2 id="d39ef991-0d85-4019-acd0-a9b945dd0918" class="">Let us first investigate the training loss:</h2><pre id="08028e85-ce74-4fcb-bc91-1374be8dbf71" class="code code-wrap"><code>import matplotlib.pyplot as plt
+x_loss=range(0,len(NN.loss)*100,100)
+
+
+line1=plt.plot(x_loss,NN.loss,linestyle=&#x27;-&#x27;,label=&#x27;training loss&#x27;)  
+
+plt.title(&#x27;Training loss&#x27;)
+plt.xlabel(&#x27;Epochs&#x27;)
+plt.ylabel(&#x27;Training loss&#x27;)
+legend = plt.legend(loc=&#x27;best&#x27;, shadow=True)</code></pre><figure id="17a97d45-61cf-44fd-ac48-0db5b8f80597" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Untitled.png"><img style="width:376px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Untitled.png"/></a></figure><ul id="7416e47c-f473-4144-b5ac-f872dbdd021f" class="bulleted-list"><li style="list-style-type:disc">Evidently the loss decreases monotonically to 0. </li></ul><h2 id="ea15c354-d686-4ba0-acba-f37e6cbaf0d7" class="">Let us investigate the Training and Dev accuracies:</h2><pre id="85ec3e1f-448e-473c-b7bb-3f5bf5b19e6e" class="code code-wrap"><code>x_training_accur=range(0,len(NN.trainingaccur)*100,100)
+x_devaccur=range(0,len(NN.devaccur)*100,100)
+
+line1=plt.plot(x_training_accur,NN.trainingaccur,linestyle=&#x27;-&#x27;,label=&#x27;training accuracy&#x27;) 
+line2=plt.plot(x_devaccur,NN.devaccur,linestyle=&#x27;-&#x27;,label=&#x27;dev accuracy&#x27;)
+                              
+plt.title(&#x27;Training and Dev Accuracies&#x27;)
+plt.xlabel(&#x27;Epochs&#x27;)
+plt.ylabel(&#x27;Accuracy&#x27;)
+legend = plt.legend(loc=&#x27;best&#x27;, shadow=True)</code></pre><figure id="bcbf1014-50c0-4c48-b928-279122611911" class="image"><a href="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Untitled%201.png"><img style="width:386px" src="6%20Hidden%20layer%20Artificial%20Neural%20Network%20from%20scra%206b7dae8098034ef3bb153c6d9e41cd61/Untitled%201.png"/></a></figure><ul id="72763a30-c101-49ec-b90c-6ad22b785259" class="bulleted-list"><li style="list-style-type:disc">Evidently the training accuracy increases as more epochs occur, and caps out at 100%.</li></ul><ul id="fb36314c-6cb0-401f-97eb-5636fa67f665" class="bulleted-list"><li style="list-style-type:disc">The dev accuracy however hits its highest at around 25000-30000 epochs, indicating that the NN isn’t learning any further beyond those epochs. The higher training accuracy also indicates overfitting on the training dataset. </li></ul><h1 id="6fc12427-6c03-46c2-b0bd-1b419aaf932c" class="">5) Conclusion</h1><figure class="block-color-gray_background callout" style="white-space:pre-wrap;display:flex" id="b6436191-43ae-4df8-9326-9e8d01248d0b"><div style="font-size:1.5em"><span class="icon">🌠</span></div><div style="width:100%">We managed to build a 8 layer NN that manages to classify images at a rather high accuracy. It might be better to increase the number of hidden nodes to 1000, or add more layers to make the NN more capable at learning patterns from given training data. The issue with overfitting can be remedied by stopping the training once the dev loss /accuracy is no longer decreasing/increasing. </div></figure><p id="c6d9f403-154a-4c59-b60e-be10b2e1683c" class="">
+</p></div></article></body></html>
