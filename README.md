@@ -2,6 +2,8 @@
 
 # Hello folks! This notion page is dedicated to showcase how to create a 6 hidden layer artificial neural network to be used in a classification task using vectorisation approach.
 
+#Alternatively, can access the HTML version of this markdown file https://leeyz888.github.io/6-hidden-layer/
+
 ## Table of contents
 
 ## 1) Dataset description
