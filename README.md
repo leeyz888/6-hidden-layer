@@ -1,3 +1,8 @@
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
 # 6 Hidden layer Artificial Neural Network from scratch with numpy only (no for loops for back-propagation)
 
 # Hello folks! This notion page is dedicated to showcase how to create a 6 hidden layer artificial neural network to be used in a classification task using vectorisation approach.
