@@ -416,7 +416,7 @@ NN.fit(X_train,Y_train,X_dev,Y_dev)
 
 ## $W_{updated} =W_{old}- \alpha * \frac{ \partial L}{ \partial W_{old}}$
 
-## $$Bias _{updated} =Bias_{old}- \alpha * \frac{ \partial L}{ \partial Bias_{old}}$$
+## $Bias_{updated} =Bias_{old}- \alpha * \frac{ \partial L}{ \partial Bias_{old}}$
 
 - Where $\alpha$ is the learning rate.
 
